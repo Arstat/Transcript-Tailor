@@ -70,12 +70,12 @@ Follow these instructions to get a copy of the project up and running on your lo
     Follow these steps carefully to allow the application to send emails on your behalf securely.
     1.  **Create a Google Cloud Project**: Go to the [Google Cloud Console](https://console.cloud.google.com/) and create a new project.
     2.  **Enable the Gmail API**: In your new project, navigate to "APIs & Services" > "Library", search for "Gmail API", and enable it.
-    3.  **Configure OAuth Consent Screen**: Go to "APIs & Services" > "OAuth consent screen". Choose "External" and fill in the required app information (app name, user support email, and developer contact). You don't need to submit it for verification for this use case.
+    3.  **Configure OAuth Consent Screen**: Go to "APIs & Services" > "OAuth consent screen". Choose "External" and click "Create". Fill in the required app information (app name, user support email, and developer contact). You don't need to submit it for verification for this use case. **Important:** While in testing mode, you must add your own email address under the "Test users" section to be able to log in.
     4.  **Create Credentials**:
         - Go to "APIs & Services" > "Credentials".
         - Click "+ CREATE CREDENTIALS" and select "OAuth client ID".
         - For "Application type", choose **Web application**.
-        - Under "Authorized redirect URIs", click "+ ADD URI" and enter `https://developers.google.com/oauthplayground`.
+        - Under "Authorized redirect URIs", click "+ ADD URI" and enter this exact URL: `https://developers.google.com/oauthplayground`. (Do not add a trailing slash or use http).
         - Click "Create". You will be shown a **Client ID** and **Client Secret**.
     5.  **Get a Refresh Token**:
         - Open the [Google OAuth 2.0 Playground](https://developers.google.com/oauthplayground).
