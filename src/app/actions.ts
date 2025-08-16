@@ -45,7 +45,7 @@ export async function shareAction(values: z.infer<typeof shareSchema>): Promise<
   }
   
   if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 'your_resend_api_key_here') {
-    return { error: 'Resend API key is not configured. Please add it to your .env file.' };
+    return { error: 'Resend API key is not configured. Please add your key to the .env file and verify your domain in Resend to send emails.' };
   }
 
   const { summary, recipients } = validatedFields.data;
