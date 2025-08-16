@@ -4,6 +4,7 @@
 import { z } from 'zod';
 import { summarizeTranscriptWithPrompt } from '@/ai/flows/summarize-transcript';
 import nodemailer from 'nodemailer';
+import { google } from 'googleapis';
 
 const summarizeSchema = z.object({
   transcript: z.string().min(10, { message: 'Transcript must be at least 10 characters long.' }),
@@ -44,31 +45,49 @@ export async function shareAction(values: z.infer<typeof shareSchema>): Promise<
   }
 
   const {
-    EMAIL_SERVER_HOST,
-    EMAIL_SERVER_PORT,
+    OAUTH_CLIENT_ID,
+    OAUTH_CLIENT_SECRET,
+    OAUTH_REFRESH_TOKEN,
     EMAIL_SERVER_USER,
-    EMAIL_SERVER_PASSWORD,
     EMAIL_FROM,
   } = process.env;
 
-  if (!EMAIL_SERVER_HOST || !EMAIL_SERVER_PORT || !EMAIL_SERVER_USER || !EMAIL_SERVER_PASSWORD || !EMAIL_FROM) {
-      return { error: 'Email server is not configured. Please set up the required environment variables.' };
+  if (!OAUTH_CLIENT_ID || !OAUTH_CLIENT_SECRET || !OAUTH_REFRESH_TOKEN || !EMAIL_SERVER_USER || !EMAIL_FROM) {
+      return { error: 'Email server is not configured. Please set up the required OAuth 2.0 environment variables.' };
   }
-  
-  const transporter = nodemailer.createTransport({
-    host: EMAIL_SERVER_HOST,
-    port: Number(EMAIL_SERVER_PORT),
-    secure: Number(EMAIL_SERVER_PORT) === 465, // true for 465, false for other ports
-    auth: {
-      user: EMAIL_SERVER_USER,
-      pass: EMAIL_SERVER_PASSWORD,
-    },
+
+  const OAuth2 = google.auth.OAuth2;
+  const oauth2Client = new OAuth2(
+    OAUTH_CLIENT_ID,
+    OAUTH_CLIENT_SECRET,
+    "https://developers.google.com/oauthplayground" // Redirect URL
+  );
+
+  oauth2Client.setCredentials({
+    refresh_token: OAUTH_REFRESH_TOKEN,
   });
 
-  const { summary, recipients, subject } = validatedFields.data;
-  const recipientList = recipients.split(',').map(email => email.trim()).filter(Boolean);
-
   try {
+    const { token: accessToken } = await oauth2Client.getAccessToken();
+    if (!accessToken) {
+      return { error: 'Failed to create access token for email.' };
+    }
+
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            type: 'OAuth2',
+            user: EMAIL_SERVER_USER,
+            clientId: OAUTH_CLIENT_ID,
+            clientSecret: OAUTH_CLIENT_SECRET,
+            refreshToken: OAUTH_REFRESH_TOKEN,
+            accessToken: accessToken,
+        },
+    });
+
+    const { summary, recipients, subject } = validatedFields.data;
+    const recipientList = recipients.split(',').map(email => email.trim()).filter(Boolean);
+
     await transporter.sendMail({
       from: EMAIL_FROM,
       to: recipientList.join(','),
