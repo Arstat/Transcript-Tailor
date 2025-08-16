@@ -70,7 +70,10 @@ Follow these instructions to get a copy of the project up and running on your lo
     Follow these steps carefully to allow the application to send emails on your behalf securely.
     1.  **Create a Google Cloud Project**: Go to the [Google Cloud Console](https://console.cloud.google.com/) and create a new project.
     2.  **Enable the Gmail API**: In your new project, navigate to "APIs & Services" > "Library", search for "Gmail API", and enable it.
-    3.  **Configure OAuth Consent Screen**: Go to "APIs & Services" > "OAuth consent screen". Choose "External" and click "Create". Fill in the required app information (app name, user support email, and developer contact). You don't need to submit it for verification for this use case. **Important:** While in testing mode, you must add your own email address under the "Test users" section to be able to log in.
+    3.  **Configure OAuth Consent Screen**: Go to "APIs & Services" > "OAuth consent screen".
+        - Choose **External** and click "Create".
+        - Fill in the required app information (app name, user support email, and developer contact).
+        - **Important:** While in testing mode, you must add your own email address under the "Test users" section to be able to log in.
     4.  **Create Credentials**:
         - Go to "APIs & Services" > "Credentials".
         - Click "+ CREATE CREDENTIALS" and select "OAuth client ID".
@@ -103,6 +106,13 @@ Follow these instructions to get a copy of the project up and running on your lo
     ```
 
     Open [http://localhost:9002](http://localhost:9002) with your browser to see the result.
+
+### Troubleshooting Email Errors
+
+- **`redirect_uri_mismatch`**: This error means the "Authorized redirect URI" in your Google Cloud credentials does not exactly match `https://developers.google.com/oauthplayground`. Go back to your credentials in the Google Cloud Console and ensure the URI is correct.
+- **`invalid_grant`**: This almost always means your **Refresh Token** is invalid or expired.
+    - **7-Day Expiration**: If your app's OAuth Consent Screen is in "Testing" mode, your refresh token will expire after 7 days.
+    - **Solution**: The quickest fix is to simply generate a new one. Go back to the [OAuth Playground](https://developers.google.com/oauthplayground) and repeat Step 5 to get a new refresh token and update your `.env` file. To get a long-lasting token, you may need to "publish" your app from the OAuth consent screen page in the Google Cloud Console.
 
 ## How to Use
 
