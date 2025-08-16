@@ -55,30 +55,32 @@ Follow these instructions to get a copy of the project up and running on your lo
 
 3.  **Set up environment variables:**
 
-    This project uses Genkit for AI and Nodemailer with Google OAuth 2.0 for sending emails.
+    This project requires two sets of credentials: one for AI and one for email.
 
     Create a `.env` file in the root of your project by copying the provided `.env.example` or creating a new one. You will need to populate it with API keys from Google AI and credentials from the Google Cloud Console.
 
-    #### Google AI API Key
-    - Get your API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
+    #### **1. Google AI API Key (for Summarization)**
+    - Go to **[Google AI Studio](https://aistudio.google.com/app/apikey)**.
+    - Click **"Create API key"**. You can create it in a new or existing Google Cloud project.
+    - **Copy** the generated API key.
     - Add it to your `.env` file:
       ```
       GOOGLE_API_KEY="your_google_ai_api_key_here"
       ```
 
-    #### Google OAuth 2.0 Credentials for Email
+    #### **2. Google OAuth 2.0 Credentials (for Email)**
     Follow these steps carefully to allow the application to send emails on your behalf securely.
-    1.  **Create a Google Cloud Project**: Go to the [Google Cloud Console](https://console.cloud.google.com/) and create a new project.
-    2.  **Enable the Gmail API**: In your new project, navigate to "APIs & Services" > "Library", search for "Gmail API", and enable it.
+    1.  **Create a Google Cloud Project**: Go to the [Google Cloud Console](https://console.cloud.google.com/) and create a new project (or use the same one from the AI key step).
+    2.  **Enable the Gmail API**: In your new project, navigate to "APIs & Services" > "Library", search for "Gmail API", and **Enable** it.
     3.  **Configure OAuth Consent Screen**: Go to "APIs & Services" > "OAuth consent screen".
         - Choose **External** and click "Create".
         - Fill in the required app information (app name, user support email, and developer contact).
         - **Important:** While in testing mode, you must add your own email address under the "Test users" section to be able to log in.
     4.  **Create Credentials**:
         - Go to "APIs & Services" > "Credentials".
-        - Click "+ CREATE CREDENTIALS" and select "OAuth client ID".
+        - Click **+ CREATE CREDENTIALS** and select "OAuth client ID".
         - For "Application type", choose **Web application**.
-        - Under "Authorized redirect URIs", click "+ ADD URI" and enter this exact URL: `https://developers.google.com/oauthplayground`. 
+        - Under "Authorized redirect URIs", click **+ ADD URI** and enter this exact URL: `https://developers.google.com/oauthplayground`. 
         - **Warning:** The `redirect_uri_mismatch` error occurs if this URL is not exactly correct. Do not use `http` or add a trailing slash.
         - Click "Create". You will be shown a **Client ID** and **Client Secret**.
     5.  **Get a Refresh Token**:
@@ -91,8 +93,10 @@ Follow these instructions to get a copy of the project up and running on your lo
 
     Your final `.env` file should look like this:
     ```
+    # For AI Summarization
     GOOGLE_API_KEY="your_google_ai_api_key"
 
+    # For Sending Email
     OAUTH_CLIENT_ID="your_google_cloud_client_id"
     OAUTH_CLIENT_SECRET="your_google_cloud_client_secret"
     OAUTH_REFRESH_TOKEN="your_refresh_token_from_playground"
