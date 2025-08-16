@@ -18,7 +18,7 @@ The development process focuses on:
 - **Customizable AI Prompts**: Tailor the AI's output by providing specific instructions. For example, you can ask it to "focus on action items," "create a high-level executive summary," or "extract all questions asked."
 - **Powerful AI Summarization**: Employs Google's Gemini model via Genkit to generate high-quality summaries based on the provided transcript and prompt.
 - **Interactive Editing**: The generated summary is not final. It's presented in an editable text area, allowing for quick manual refinements and corrections.
-- **Seamless Email Sharing**: Share the finalized summary with multiple recipients without leaving the application.
+- **Seamless Email Sharing**: Share the finalized summary with multiple recipients without leaving the application, using your own Gmail account via OAuth 2.0.
 
 ## Tech Stack
 
@@ -28,7 +28,7 @@ This project is built with a modern, robust, and scalable tech stack:
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/) with [shadcn/ui](https://ui.shadcn.com/) - A utility-first CSS framework combined with a set of beautifully designed and accessible components, allowing for rapid and consistent UI development.
 - **AI Integration**: [Genkit](https://firebase.google.com/docs/genkit) with [Google AI](https://ai.google/) - Provides a structured and maintainable way to define and run AI-powered flows using the powerful Gemini family of models.
 - **Form Management**: [React Hook Form](https://react-hook-form.com/) with [Zod](https://zod.dev/) - A powerful combination for creating performant, accessible, and easily validated forms.
-- **Email Delivery**: [Resend](https://resend.com) - A developer-friendly email API for reliable and scalable email sending.
+- **Email Delivery**: [Nodemailer](https://nodemailer.com/) with [Google OAuth 2.0](https://developers.google.com/identity/protocols/oauth2) - A secure and reliable method for sending emails through your Gmail account.
 
 ## Getting Started
 
@@ -38,6 +38,7 @@ Follow these instructions to get a copy of the project up and running on your lo
 
 - [Node.js](https://nodejs.org/) (version 20 or later)
 - [npm](https://www.npmjs.com/)
+- A Google Account
 
 ### Installation
 
@@ -54,12 +55,45 @@ Follow these instructions to get a copy of the project up and running on your lo
 
 3.  **Set up environment variables:**
 
-    This project uses Genkit with Google AI and Resend for emails. You will need to obtain API keys from both services.
+    This project uses Genkit for AI and Nodemailer with Google OAuth 2.0 for sending emails.
 
-    Create a `.env` file in the root of your project and add your API keys:
+    Create a `.env` file in the root of your project by copying the provided `.env.example` or creating a new one. You will need to populate it with API keys from Google AI and credentials from the Google Cloud Console.
+
+    #### Google AI API Key
+    - Get your API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
+    - Add it to your `.env` file:
+      ```
+      GOOGLE_API_KEY="your_google_ai_api_key_here"
+      ```
+
+    #### Google OAuth 2.0 Credentials for Email
+    Follow these steps carefully to allow the application to send emails on your behalf securely.
+    1.  **Create a Google Cloud Project**: Go to the [Google Cloud Console](https://console.cloud.google.com/) and create a new project.
+    2.  **Enable the Gmail API**: In your new project, navigate to "APIs & Services" > "Library", search for "Gmail API", and enable it.
+    3.  **Configure OAuth Consent Screen**: Go to "APIs & Services" > "OAuth consent screen". Choose "External" and fill in the required app information (app name, user support email, and developer contact). You don't need to submit it for verification for this use case.
+    4.  **Create Credentials**:
+        - Go to "APIs & Services" > "Credentials".
+        - Click "+ CREATE CREDENTIALS" and select "OAuth client ID".
+        - For "Application type", choose **Web application**.
+        - Under "Authorized redirect URIs", click "+ ADD URI" and enter `https://developers.google.com/oauthplayground`.
+        - Click "Create". You will be shown a **Client ID** and **Client Secret**.
+    5.  **Get a Refresh Token**:
+        - Open the [Google OAuth 2.0 Playground](https://developers.google.com/oauthplayground).
+        - Click the gear icon in the top right, check **"Use your own OAuth credentials"**, and paste in your Client ID and Client Secret.
+        - In Step 1, find and authorize the **Gmail API** scope: `https://mail.google.com/`.
+        - Click "Authorize APIs". You will be prompted to sign in and grant permission.
+        - In Step 2, click **"Exchange authorization code for tokens"**. This will give you a **Refresh token**.
+    6.  **Update `.env` file**: Copy the credentials into your `.env` file.
+
+    Your final `.env` file should look like this:
     ```
-    GOOGLE_API_KEY="your_google_ai_api_key_here"
-    RESEND_API_KEY="your_resend_api_key_here"
+    GOOGLE_API_KEY="your_google_ai_api_key"
+
+    OAUTH_CLIENT_ID="your_google_cloud_client_id"
+    OAUTH_CLIENT_SECRET="your_google_cloud_client_secret"
+    OAUTH_REFRESH_TOKEN="your_refresh_token_from_playground"
+    EMAIL_SERVER_USER="your.email@gmail.com"
+    EMAIL_FROM="your.email@gmail.com"
     ```
 
 4.  **Run the development server:**
