@@ -23,6 +23,7 @@ const summarizeSchema = z.object({
 
 const shareSchema = z.object({
   summary: z.string().min(10, { message: 'Summary must be at least 10 characters long.' }),
+  subject: z.string().min(3, { message: 'Subject must be at least 3 characters long.' }),
   recipients: z.string().refine((value) => {
     if (!value) return false;
     return value.split(',').every(email => z.string().email().safeParse(email.trim()).success);
@@ -46,6 +47,7 @@ export function TranscriptForm() {
     resolver: zodResolver(shareSchema),
     defaultValues: {
       summary: '',
+      subject: '',
       recipients: '',
     },
   });
@@ -85,6 +87,7 @@ export function TranscriptForm() {
     } else if (result.summary) {
       setSummary(result.summary);
       shareForm.setValue('summary', result.summary);
+      shareForm.setValue('subject', `Summary for ${fileName || 'Transcript'}`);
       toast({
         title: 'Success!',
         description: 'Your summary has been generated.',
@@ -105,7 +108,7 @@ export function TranscriptForm() {
         title: 'Email Sent!',
         description: result.message,
       });
-      shareForm.reset({ summary: values.summary, recipients: '' });
+      shareForm.reset({ summary: values.summary, subject: values.subject, recipients: '' });
     }
   };
 
@@ -208,6 +211,23 @@ export function TranscriptForm() {
                       <FormControl>
                         <Textarea
                           className="min-h-[250px] resize-y"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={shareForm.control}
+                  name="subject"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Subject</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Summary for our meeting"
                           {...field}
                         />
                       </FormControl>

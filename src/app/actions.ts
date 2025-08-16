@@ -2,10 +2,8 @@
 'use server';
 
 import { z } from 'zod';
-import { Resend } from 'resend';
 import { summarizeTranscriptWithPrompt } from '@/ai/flows/summarize-transcript';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import nodemailer from 'nodemailer';
 
 const summarizeSchema = z.object({
   transcript: z.string().min(10, { message: 'Transcript must be at least 10 characters long.' }),
@@ -14,6 +12,7 @@ const summarizeSchema = z.object({
 
 const shareSchema = z.object({
   summary: z.string().min(10, { message: 'Summary must be at least 10 characters long.' }),
+  subject: z.string().min(3, { message: 'Subject must be at least 3 characters long.' }),
   recipients: z.string().refine((value) => {
     if (!value) return false;
     return value.split(',').every(email => z.string().email().safeParse(email.trim()).success);
@@ -43,20 +42,37 @@ export async function shareAction(values: z.infer<typeof shareSchema>): Promise<
   if (!validatedFields.success) {
     return { error: 'Invalid input for sharing.' };
   }
-  
-  if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 'your_resend_api_key_here') {
-    return { error: 'Resend API key is not configured. Please add your key to the .env file and verify your domain in Resend to send emails.' };
-  }
 
-  const { summary, recipients } = validatedFields.data;
+  const {
+    EMAIL_SERVER_HOST,
+    EMAIL_SERVER_PORT,
+    EMAIL_SERVER_USER,
+    EMAIL_SERVER_PASSWORD,
+    EMAIL_FROM,
+  } = process.env;
+
+  if (!EMAIL_SERVER_HOST || !EMAIL_SERVER_PORT || !EMAIL_SERVER_USER || !EMAIL_SERVER_PASSWORD || !EMAIL_FROM) {
+      return { error: 'Email server is not configured. Please set up the required environment variables.' };
+  }
+  
+  const transporter = nodemailer.createTransport({
+    host: EMAIL_SERVER_HOST,
+    port: Number(EMAIL_SERVER_PORT),
+    secure: Number(EMAIL_SERVER_PORT) === 465, // true for 465, false for other ports
+    auth: {
+      user: EMAIL_SERVER_USER,
+      pass: EMAIL_SERVER_PASSWORD,
+    },
+  });
+
+  const { summary, recipients, subject } = validatedFields.data;
   const recipientList = recipients.split(',').map(email => email.trim()).filter(Boolean);
 
   try {
-    await resend.emails.send({
-      from: 'Transcript-Tailor <onboarding@resend.dev>',
-      to: recipientList,
-      subject: 'Summary from AI-Powered Summarizer',
-      text: summary,
+    await transporter.sendMail({
+      from: EMAIL_FROM,
+      to: recipientList.join(','),
+      subject: subject,
       html: `<p>${summary.replace(/\n/g, '<br>')}</p>`,
     });
     
