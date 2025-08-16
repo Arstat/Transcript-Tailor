@@ -53,9 +53,9 @@ export async function shareAction(values: z.infer<typeof shareSchema>): Promise<
 
   try {
     await resend.emails.send({
-      from: 'Transcript Tailor <onboarding@resend.dev>',
+      from: 'Acme <onboarding@resend.dev>',
       to: recipientList,
-      subject: 'Your Meeting Summary',
+      subject: 'Summary from AI-Powered Summarizer',
       text: summary,
       html: `<p>${summary.replace(/\n/g, '<br>')}</p>`,
     });
