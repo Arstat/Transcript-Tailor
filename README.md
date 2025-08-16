@@ -75,7 +75,8 @@ Follow these instructions to get a copy of the project up and running on your lo
         - Go to "APIs & Services" > "Credentials".
         - Click "+ CREATE CREDENTIALS" and select "OAuth client ID".
         - For "Application type", choose **Web application**.
-        - Under "Authorized redirect URIs", click "+ ADD URI" and enter this exact URL: `https://developers.google.com/oauthplayground`. (Do not add a trailing slash or use http).
+        - Under "Authorized redirect URIs", click "+ ADD URI" and enter this exact URL: `https://developers.google.com/oauthplayground`. 
+        - **Warning:** The `redirect_uri_mismatch` error occurs if this URL is not exactly correct. Do not use `http` or add a trailing slash.
         - Click "Create". You will be shown a **Client ID** and **Client Secret**.
     5.  **Get a Refresh Token**:
         - Open the [Google OAuth 2.0 Playground](https://developers.google.com/oauthplayground).
